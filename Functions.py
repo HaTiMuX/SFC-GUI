@@ -1,8 +1,40 @@
-###########
-#Functions#
-###########
+import MySQLdb
 
-def Update_Add(Index, rowMap):
+def Loc_Update(SF, Locator, db, cursor):
+	try:
+		#Reading locators of the existing SF Nodes
+		sql = "SELECT Locator1 FROM Locators"
+		cursor.execute(sql)
+		results = cursor.fetchall()
+	except:
+		print "Error: unable to read data from the local server (locators of the existing SF Nodes)!"
+
+	sql = "INSERT INTO LocalLocators (SF, Locator) VALUES ('%s','%s')" % (SF, Locator)
+	for result in results:
+		IP = result[0]
+
+		if Locator==IP:
+			break
+		try:
+			remoteDB = MySQLdb.connect(IP,"sfcuser","sfc123","SFC")
+			remoteCursor = remoteDB.cursor()
+			try:
+				remoteCursor.execute(sql)
+				remoteDB.commit()
+				print "Adding data to remote Node %s: Success!" % IP
+			except:
+				remoteDB.rollback()
+				print "Error: unable to add data to remote Node %s!" % IP
+				remoteDB.close()
+
+			remoteDB.close()
+		except:
+			print "Error: connecting to remote server %s failed! (Local locators add failed)" % IP
+
+	print "Updating Locallocators Databases done!"
+
+
+def Update_Add(Index, rowMap, db, cursor):
 	SFMap = rowMap.lstrip('{')
 	SFMap = SFMap.rstrip('}')
 	SF_Map = SFMap.split(', ')
@@ -38,7 +70,7 @@ def Update_Add(Index, rowMap):
 
 		remoteDB.close()
 	except:
-		print "Error: connecting to remote server %s failed! (SFCRoutingTable add update failed)" % IP
+		print "Error: connecting to Ingress Node failed! (SFCRoutingTable add update failed)"
 
 	print ""
 
@@ -97,7 +129,7 @@ def Update_Add(Index, rowMap):
 		print ""
 
 
-def Update_Del(Index, rowMap):
+def Update_Del(Index, rowMap, db, cursor):
 	SFMap = rowMap.lstrip('{')
 	SFMap = SFMap.rstrip('}')
 	SF_Map = SFMap.split(', ')

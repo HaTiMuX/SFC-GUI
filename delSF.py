@@ -1,6 +1,7 @@
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
-def delFunc(self): #Deleting an existing SF Function
+#Deleting an existing SF Function
+def delFunc(self, db, cursor, DSCP): 
 	if self.delFuncFrame.combo.count() != 0:
 		curtext = self.delFuncFrame.combo.currentText()
 		SF = curtext.split(' ')
@@ -68,7 +69,7 @@ def delFunc(self): #Deleting an existing SF Function
 									print "Error Deleting SF Map from the local repositry"
 
 								#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
-								Update_Del(index, rowMap)
+								Update_Del(index, rowMap, db, cursor)
 								break;
 
 				except:

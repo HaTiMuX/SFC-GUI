@@ -1,7 +1,8 @@
+import re
 from PyQt4 import QtGui, QtCore
 
 
-def addLocUpdate(self):
+def addLocUpdate(self, db, cursor):
 	#Reading current SF functions
 	curtext = self.addLocFrame.combo.currentText()
 	SF = curtext.split(' ')
@@ -13,7 +14,7 @@ def addLocUpdate(self):
    		result = cursor.fetchone()
 
 	except:
-		print "Error: unable to fecth the number of SF's locators"
+		print "Error: unable to fecth the number of SF's locators (addLocUpdate)"
 
 	try:
 		locNum = result[0]
@@ -25,15 +26,17 @@ def addLocUpdate(self):
 			self.addLocFrame.newLoc2_le.setDisabled(True)
 			self.addLocFrame.newLoc3_le.setDisabled(False)
 
-		else:
+		elif locNum==1:
 			self.addLocFrame.newLoc2_le.setDisabled(False)
 			self.addLocFrame.newLoc3_le.setDisabled(False)
+		else:
+			print "Unexpected error: combo event LocNum"
 	except:
 		print "No entry remaining"
 
 
 #Add locator to an existing SF Function
-def addLoc(self): 
+def addLoc(self, db, cursor): 
 	if self.addLocFrame.combo.count() != 0:
 		#Preparing conditions
 		cb_index = self.addLocFrame.combo.currentIndex()

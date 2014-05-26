@@ -1,7 +1,8 @@
+import re
 from PyQt4 import QtGui
+from Functions import Update_Add
 
-
-def addMap_buttonClicked(self):
+def addMap(self, db, cursor, DSCP, count):
 	if(count!=0):
 		index_text = self.addMapFrame.index_le.text()
 		DSCPexp = "^([1-9]|[1-5][0-9]|6[0-3])$"
@@ -28,9 +29,11 @@ def addMap_buttonClicked(self):
 						print "Error Adding new SF Map"
 
 					self.delMapFrame.combo.addItem(str(index) + " " + newSFMap)
-
-					#Updating SFC Routing Tables of the Nodes involved in the new SF Map
-					Update_Add(index, newSFMap)
+					try:	
+						#Updating SFC Routing Tables of the Nodes involved in the new SF Map
+						Update_Add(index, newSFMap, db, cursor)
+					except:
+						print "Error: Updating SFCRouting Tables failed! (SF Map Add)"
 			except:
 				QtGui.QMessageBox.critical(self, 'Error', "No DSCP value remaining!" , QtGui.QMessageBox.Ok)
 
@@ -68,7 +71,7 @@ def addMap_buttonClicked(self):
 						self.delMapFrame.combo.addItem(str(index) + " " + newSFMap)
 
 						#Updating SFC Routing Tables of the Nodes involved in the new SF Map
-						Update_Add(index, newSFMap)
+						Update_Add(index, newSFMap, db, cursor)
 
 				else:
 					#Printing Error: Index already exists

@@ -774,45 +774,44 @@ class MainWindow(QtGui.QMainWindow):
 	#*SF Management FEvents*#
 	#***********************#
 	def addFunc_buttonClicked(self):
-		addFunc(self)
+		addFunc(self, db, cursor)
 
 	def delFunc_buttonClicked(self): #Deleting an existing SF Function
-		delFunc(self)
+		delFunc(self, db, cursor, DSCP)
 
 	#*******************#
 	#*SF Update FEvents*#
 	#*******************#
 	def addLocUpdate_comboEventHandler(self):
-		addLocUpdate(self)
+		addLocUpdate(self, db, cursor)
 
 	def updateLocUpdate_comboEventHandler(self):
-		updateLocUpdate(self)
+		updateLocUpdate(self, db, cursor)
 
 	def addLoc_buttonClicked(self): 
-		addLoc(self) 
+		addLoc(self, db, cursor) 
 
 	def updateLoc_buttonClicked(self):
-		updateLoc(self)
+		updateLoc(self, db, cursor)
 
 	def delLoc_buttonClicked(self):
-		delLoc(self)
+		delLoc(self, db, cursor)
 
 	#****************************#
 	#*SF Maps Management FEvents*#
 	#****************************#
+	def addMap_buttonClicked(self):
+		addMap(self, db, cursor, DSCP, count)
+
+	def delMap_buttonClicked(self):
+		delMap(self, db, cursor, DSCP)
+	
 	def resetMap_buttonClicked(self):
 		global count
 		count=0
 		self.addMapFrame.SFLabel.setText("New SF Map:  ")
 		for checkbox in self.addMapFrame.checkBoxList[0]:
 			checkbox.setCheckState(0)
-
-
-
-
-	def addMap_buttonClicked(self):
-		addMap(self)
-		
 
 	def checkBoxClicked(self):
 		global count

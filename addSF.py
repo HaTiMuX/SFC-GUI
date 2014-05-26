@@ -1,13 +1,17 @@
 import re
+from Functions import *
+from PyQt4 import QtGui
 
 
-def addFunc(self): #Adding a new SF Function
+#Adding a new SF Function
+def addFunc(self, db, cursor): 
 	locNum = 3
 	sf = self.addFuncFrame.func_le.text()
 	locator1 = self.addFuncFrame.loc1_le.text()
 	locator2 = self.addFuncFrame.loc2_le.text()
 	locator3 = self.addFuncFrame.loc3_le.text()
-	#description = self.addFuncFrame.desc_te.text()
+	description = self.addFuncFrame.desc_te.toPlainText()
+
 	SFExp = "^[a-z,A-Z]{2}[a-z,A-Z,0-9]?([a-z,A-Z,0-9,_]?){27}$"
 	IPExp = "^((25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$"
 	emptyExp = "^( ?){15}$"
@@ -40,7 +44,6 @@ def addFunc(self): #Adding a new SF Function
 					reply = QtGui.QMessageBox.question(self, 'Confirmation', "Confirm add operation?",
 						QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 	
-
 					if reply == QtGui.QMessageBox.Yes:
 						try:
 							if emptyCond3 is True:
@@ -54,6 +57,11 @@ def addFunc(self): #Adding a new SF Function
 							cursor.execute(sql)
 						   	db.commit()
 
+						except:
+					  		db.rollback()
+							print "Error inserting New SF-Locator"
+							
+						try:
 							#Updating List of "delFuncFrame"
 							self.delFuncFrame.combo.addItem(sf)	
 
@@ -67,7 +75,7 @@ def addFunc(self): #Adding a new SF Function
 								self.addLocFrame.combo.addItem(sf + " => " + locator1 + "|" + locator2)
 							elif locNum==1:
 								self.addLocFrame.combo.addItem(sf + " => " + locator1)
-				
+			
 							#Updating List of "updateLocFrame"
 							self.updateLocFrame.SFList.append(sf)
 							self.updateLocFrame.loc1.append(locator1)
@@ -88,8 +96,15 @@ def addFunc(self): #Adding a new SF Function
 							self.addMapFrame.SFCheckListDisplay()
 
 						except:
-					  		db.rollback()
-							print "Error inserting New SF-Locator"
+							print "Error Updating Lists"
+						
+						try:
+							#Updating LocalLocators of the SF Nodes
+							Loc_Update(sf, locator1, db, cursor)
+
+						except:
+							print "Error Updating LocalLocators"
+
 			else:
 				self.addFuncFrame.msg.setText("SF Function already exists!")
 		except:

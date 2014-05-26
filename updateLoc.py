@@ -1,6 +1,7 @@
+import re
 from PyQt4 import QtGui, QtCore
 
-def updateLocUpdate(self):
+def updateLocUpdate(self, db, cursor):
 	#Reading current SF functions
 	curtext = self.updateLocFrame.combo.currentText()
 	SF = curtext.split(' ')
@@ -30,13 +31,13 @@ def updateLocUpdate(self):
 			self.updateLocFrame.newLoc2_le.setDisabled(True)
 			self.updateLocFrame.newLoc3_le.setDisabled(True)
 		else:
-			print "Error combo event"
+			print "Unexpected error: combo event LocNum"
 
 	except:
 		print "No entry remaining"
 
 
-def updateLoc(self): #updating locators of an existing SF Function
+def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 	if self.updateLocFrame.combo.count() != 0:
 		#Preparing conditions
 		cb_index = self.updateLocFrame.combo.currentIndex()

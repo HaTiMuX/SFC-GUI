@@ -1,6 +1,8 @@
+from PyQt4 import QtGui
+from Functions import Update_Del
 
 #Deleting an existing SF Map
-def delMap_buttonClicked(self): 
+def delMap(self, db, cursor, DSCP): 
 	if self.delMapFrame.combo.count() != 0:
 		curtext = str(self.delMapFrame.combo.currentText()) #Converting to str to use lstrip 
 
@@ -28,7 +30,7 @@ def delMap_buttonClicked(self):
 				print "Error Deleting SF Map from the local repositry"
 
 			#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
-			Update_Del(mapIndex, SFMap)
+			Update_Del(mapIndex, SFMap, db, cursor)
 
 	else:
 		QtGui.QMessageBox.critical(self, 'Error', "No Entry remaining!" , QtGui.QMessageBox.Ok)
