@@ -34,7 +34,7 @@ def updateLocUpdate(self, db, cursor):
 			print "Unexpected error: combo event LocNum"
 
 	except:
-		print "No entry remaining"
+		print "No entry remaining (update)"
 
 
 def updateLoc(self, db, cursor): #updating locators of an existing SF Function

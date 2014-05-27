@@ -32,7 +32,7 @@ def addLocUpdate(self, db, cursor):
 		else:
 			print "Unexpected error: combo event LocNum"
 	except:
-		print "No entry remaining"
+		print "No entry remaining (add loc)"
 
 
 #Add locator to an existing SF Function

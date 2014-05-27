@@ -22,6 +22,9 @@ def delMap(self, db, cursor, DSCP):
 			cb_index = self.delMapFrame.combo.currentIndex()	
 			self.delMapFrame.combo.removeItem(cb_index)
 
+			#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
+			error = Update_Del(mapIndex, SFMap)
+
 			try:	
 				cursor.execute(sql)
 	   			db.commit()
@@ -29,8 +32,7 @@ def delMap(self, db, cursor, DSCP):
   				db.rollback()
 				print "Error Deleting SF Map from the local repositry"
 
-			#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
-			Update_Del(mapIndex, SFMap, db, cursor)
+
 
 	else:
 		QtGui.QMessageBox.critical(self, 'Error', "No Entry remaining!" , QtGui.QMessageBox.Ok)

@@ -29,11 +29,16 @@ def addMap(self, db, cursor, DSCP, count):
 						print "Error Adding new SF Map"
 
 					self.delMapFrame.combo.addItem(str(index) + " " + newSFMap)
-					try:	
-						#Updating SFC Routing Tables of the Nodes involved in the new SF Map
-						Update_Add(index, newSFMap, db, cursor)
-					except:
+
+					#Updating SFC Routing Tables of the Nodes involved in the new SF Map
+					error = Update_Add(index, newSFMap)
+					if error==0:
+						print "Updating SFCRouting Tables: Success!"
+					else:
 						print "Error: Updating SFCRouting Tables failed! (SF Map Add)"
+
+					#Update of SFMapIndexesList
+					self.delMapFrame.SFMapIndexesList.append(index)
 			except:
 				QtGui.QMessageBox.critical(self, 'Error', "No DSCP value remaining!" , QtGui.QMessageBox.Ok)
 
@@ -71,7 +76,11 @@ def addMap(self, db, cursor, DSCP, count):
 						self.delMapFrame.combo.addItem(str(index) + " " + newSFMap)
 
 						#Updating SFC Routing Tables of the Nodes involved in the new SF Map
-						Update_Add(index, newSFMap, db, cursor)
+						error = Update_Add(index, newSFMap)
+						if error==0:
+							print "Updating SFCRouting Tables: Success!"
+						else:
+							print "Error: Updating SFCRouting Tables failed! (SF Map Add)"
 
 				else:
 					#Printing Error: Index already exists
@@ -79,7 +88,5 @@ def addMap(self, db, cursor, DSCP, count):
 					print "SF_Map_Index already exists!! Try again."
 			except:
 				print "Error While Testing if the typed SF_Map_Index already exists!!"
-
-
 	else:
 		QtGui.QMessageBox.critical(self, 'Error', "No SF Function selected!" , QtGui.QMessageBox.Ok)

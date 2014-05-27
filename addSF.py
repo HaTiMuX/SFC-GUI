@@ -1,12 +1,13 @@
 import re
-from Functions import *
+from Functions import Loc_Update
 from PyQt4 import QtGui
 
 
 #Adding a new SF Function
 def addFunc(self, db, cursor): 
+	error = 0
 	locNum = 3
-	sf = self.addFuncFrame.func_le.text()
+	SF = self.addFuncFrame.func_le.text()
 	locator1 = self.addFuncFrame.loc1_le.text()
 	locator2 = self.addFuncFrame.loc2_le.text()
 	locator3 = self.addFuncFrame.loc3_le.text()
@@ -23,92 +24,99 @@ def addFunc(self, db, cursor):
 	emptyCond2 = re.search(emptyExp, locator2) is not None 
 	emptyCond3 = re.search(emptyExp, locator3) is not None 
 
-	if re.search(SFExp, sf) is not None:
+	if re.search(SFExp, SF) is not None:
 		#Checking if the SF Function already exists
-		sql = "SELECT SF FROM Locators WHERE SF='%s'" % sf
+		sql = "SELECT SF FROM Locators WHERE SF='%s'" % SF
 		try:	
 			cursor.execute(sql)
 	   		result = cursor.fetchone()
-			if result is None:
-				if IPCond1 is False:
-					self.addFuncFrame.msg.setText("Type a valid IP address for the first locator!")
+		except:
+			error = 1
+			print "Error: Checking if the new SF Function already exists failed!"
 
-				elif ((IPCond2 is False) and (emptyCond2 is False)) or ((emptyCond2 is True) and (emptyCond3 is False)): 
-					self.addFuncFrame.msg.setText("Type a valid IP address for the second locator!")
+		if (result is None) and (error==0):
+			if IPCond1 is False:
+				self.addFuncFrame.msg.setText("Type a valid IP address for the first locator!")
 
-				elif IPCond3 is False and emptyCond3 is False:
-					self.addFuncFrame.msg.setText("Type a valid IP address for the third locator!")
+			elif ((IPCond2 is False) and (emptyCond2 is False)) or ((emptyCond2 is True) and (emptyCond3 is False)): 
+				self.addFuncFrame.msg.setText("Type a valid IP address for the second locator!")
 
-				else:
-					self.addFuncFrame.msg.setText("")
-					reply = QtGui.QMessageBox.question(self, 'Confirmation', "Confirm add operation?",
-						QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
-	
-					if reply == QtGui.QMessageBox.Yes:
-						try:
-							if emptyCond3 is True:
-								locator3 =""
-								locNum -= 1
-							if emptyCond2 is True:
-								locator2 ="" 
-								locNum -= 1
-
-							sql = "INSERT INTO Locators (SF, Locator1, Locator2, Locator3, Description, LocNum) VALUES ('%s', '%s', '%s', '%s', '%s', %d)" % (sf, locator1, locator2, locator3, description, locNum)
-							cursor.execute(sql)
-						   	db.commit()
-
-						except:
-					  		db.rollback()
-							print "Error inserting New SF-Locator"
-							
-						try:
-							#Updating List of "delFuncFrame"
-							self.delFuncFrame.combo.addItem(sf)	
-
-							#Updating List of "addLocFrame"
-							self.addLocFrame.loc1.append(locator1)
-							self.addLocFrame.loc2.append(locator2)
-							self.addLocFrame.loc3.append(locator3)
-							if locNum==3:
-								self.addLocFrame.combo.addItem(sf + " => " + locator1 + "|" + locator2 + "|" + locator3)
-							if locNum==2:	
-								self.addLocFrame.combo.addItem(sf + " => " + locator1 + "|" + locator2)
-							elif locNum==1:
-								self.addLocFrame.combo.addItem(sf + " => " + locator1)
-			
-							#Updating List of "updateLocFrame"
-							self.updateLocFrame.SFList.append(sf)
-							self.updateLocFrame.loc1.append(locator1)
-							self.updateLocFrame.loc2.append(locator2)
-							self.updateLocFrame.loc3.append(locator3)
-							if locNum==3:
-								self.updateLocFrame.combo.addItem(sf + " => " + locator1 + "|" + locator2 + "|" + locator3)
-							elif locNum==2:	
-								self.updateLocFrame.combo.addItem(sf + " => " + locator1 + "|" + locator2)
-							else:
-								self.updateLocFrame.combo.addItem(sf + " => " + locator1)
-
-							#Updating List of available SF in the "Add Map Frame"
-							self.addMapFrame.checkBoxList[0].append(QtGui.QCheckBox(sf)) 
-							self.addMapFrame.checkBoxList[1].append(sf) 
-							l = len(self.addMapFrame.checkBoxList[0])-1
-							self.addMapFrame.checkBoxList[0][l].clicked.connect(self.checkBoxClicked) 
-							self.addMapFrame.SFCheckListDisplay()
-
-						except:
-							print "Error Updating Lists"
-						
-						try:
-							#Updating LocalLocators of the SF Nodes
-							Loc_Update(sf, locator1, db, cursor)
-
-						except:
-							print "Error Updating LocalLocators"
+			elif IPCond3 is False and emptyCond3 is False:
+				self.addFuncFrame.msg.setText("Type a valid IP address for the third locator!")
 
 			else:
-				self.addFuncFrame.msg.setText("SF Function already exists!")
-		except:
-			print "Error Checking if the new SF Function already exists"
+				self.addFuncFrame.msg.setText("")
+				reply = QtGui.QMessageBox.question(self, 'Confirmation', "Confirm add operation?",
+					QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
+
+				if reply == QtGui.QMessageBox.Yes:
+					print "**** Adding New SF Function ****"
+
+					#Adding New SF Function to the Locators Database
+					try:
+						if emptyCond3 is True:
+							locator3 =""
+							locNum -= 1
+						if emptyCond2 is True:
+							locator2 ="" 
+							locNum -= 1
+						sql = "INSERT INTO Locators (SF, Locator1, Locator2, Locator3, Description, LocNum) VALUES ('%s', '%s', '%s', '%s', '%s', %d)" % (SF, locator1, locator2, locator3, description, locNum)
+						cursor.execute(sql)
+						print "Adding New SF Function to local repository: Success!"
+					except:
+						error = 1
+						print "Adding New SF Function to local repository: Failed!"
+
+					#Updating LocalLocators of the SF Nodes
+					error = Loc_Update(SF, locator1)
+					if error==0:
+						print "Updating LocalLocators: Success!"
+					else:
+						print "Error: Updating LocalLocators Failed!"
+						
+					if error==0:
+						#Updating List of "delFuncFrame"
+						self.delFuncFrame.combo.addItem(SF)	
+
+						#Updating List of "addLocFrame"
+						self.addLocFrame.loc1.append(locator1)
+						self.addLocFrame.loc2.append(locator2)
+						self.addLocFrame.loc3.append(locator3)
+						if locNum==3:
+							self.addLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2 + "|" + locator3)
+						if locNum==2:	
+							self.addLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2)
+						elif locNum==1:
+							self.addLocFrame.combo.addItem(SF + " => " + locator1)
+		
+						#Updating List of "updateLocFrame"
+						self.updateLocFrame.SFList.append(SF)
+						self.updateLocFrame.loc1.append(locator1)
+						self.updateLocFrame.loc2.append(locator2)
+						self.updateLocFrame.loc3.append(locator3)
+						if locNum==3:
+							self.updateLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2 + "|" + locator3)
+						elif locNum==2:	
+							self.updateLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2)
+						else:
+							self.updateLocFrame.combo.addItem(SF + " => " + locator1)
+
+						#Updating List of available SF in the "Add Map Frame"
+						self.addMapFrame.checkBoxList[0].append(QtGui.QCheckBox(SF)) 
+						self.addMapFrame.checkBoxList[1].append(SF) 
+						l = len(self.addMapFrame.checkBoxList[0])-1
+						self.addMapFrame.checkBoxList[0][l].clicked.connect(self.checkBoxClicked) 
+						self.addMapFrame.SFCheckListDisplay()
+
+						db.commit()
+						print "Adding new SF Function done!"
+						print "****"
+					else:
+						db.rollback()
+						print "Error: Adding new SF Function failed"
+						print "****"
+		else:
+			self.addFuncFrame.msg.setText("SF Function already exists!")
+
 	else:
 		self.addFuncFrame.msg.setText("Type a valid SF Function! (At least 2 letters)")
-		#QtGui.QMessageBox.critical(self, 'Error', "No SF Function selected!" , QtGui.QMessageBox.Ok)

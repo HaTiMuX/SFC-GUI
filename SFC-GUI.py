@@ -6,6 +6,7 @@ from math import sqrt
 import re
 from PyQt4 import QtGui, QtCore
 import MySQLdb
+
 from manRules import *
 from addSF import *
 from delSF import *
@@ -15,6 +16,7 @@ from updateLoc import *
 from delLoc import *
 
 from addMap import *
+from delMap import *
 from Functions import *
 
 count=0
@@ -281,7 +283,7 @@ class delFunction_Frame(QtGui.QFrame):
 
 		#Combo Box
 		self.combo = QtGui.QComboBox(self)
-		sql = "SELECT SF, Locator1, Locator2, locator3 FROM Locators"			
+		sql = "SELECT SF FROM Locators"			
 		try:	
 			cursor.execute(sql)
    			results = cursor.fetchall()
@@ -753,7 +755,7 @@ class MainWindow(QtGui.QMainWindow):
 
 	def updateLocator_buttonClicked(self):
 		self.central_widget.setCurrentWidget(self.updateLocFrame)
-		self.statusBar().showMessage("Updating an existing SF Function",0)
+		self.statusBar().showMessage("Updating locators of an existing SF Function",0)
 		self.updateLocUpdate_comboEventHandler()
 
 	def delLocator_buttonClicked(self):
