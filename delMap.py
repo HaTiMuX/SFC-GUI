@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from Functions import Update_Del
+from Functions import delMap_Update
 
 #Deleting an existing SF Map
 def delMap(self, db, cursor, DSCP): 
@@ -23,7 +23,7 @@ def delMap(self, db, cursor, DSCP):
 			self.delMapFrame.combo.removeItem(cb_index)
 
 			#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
-			error = Update_Del(mapIndex, SFMap)
+			error = delMap_Update(mapIndex, SFMap)
 
 			try:	
 				cursor.execute(sql)

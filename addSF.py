@@ -1,5 +1,5 @@
 import re
-from Functions import Loc_Update
+from Functions import addSF_Update
 from PyQt4 import QtGui
 
 
@@ -68,7 +68,7 @@ def addFunc(self, db, cursor):
 						print "Adding New SF Function to local repository: Failed!"
 
 					#Updating LocalLocators of the SF Nodes
-					error = Loc_Update(SF, locator1)
+					error = addSF_Update(SF, locator1)
 					if error==0:
 						print "Updating LocalLocators: Success!"
 					else:

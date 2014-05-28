@@ -87,11 +87,10 @@ def addLoc(self, db, cursor):
 					sql = "UPDATE Locators SET Locator2 = '%s', Locator3 = '%s', LocNum = %d WHERE SF='%s'" % (newLoc2, newLoc3, locNum, updatedSF)
 
 		elif locNum==2:
-			newLoc2 = self.addLocFrame.loc2[cb_index]
+			newLoc2 = self.addLocFrame.locators[2][cb_index] #Needed in display (locNum==3 has to cases from 1 or from 2)
 			newLoc3 = self.addLocFrame.newLoc3_le.text()
 			
 			IPCond3= re.search(IPExp, newLoc3) is not None
-
 			if (IPCond3 is False):
 				error = "Type valid IP address for the third locator"
 			else:
@@ -99,7 +98,7 @@ def addLoc(self, db, cursor):
 				sql = "UPDATE Locators SET Locator3 = '%s', LocNum = %d WHERE SF='%s'" % (newLoc3, locNum, updatedSF)
 
 		else:
-			error = "Unknown error"
+			error = "Unknown error (Loc Add)"
 
 		if error is None:
 			self.addLocFrame.error_msg.setText("")
@@ -114,37 +113,35 @@ def addLoc(self, db, cursor):
 	  				db.rollback()
 					print "Error Updating SF Locators"
 
-				#Updating List of SF Functions and locators "addLocFrame"
+				#Updating List of SF Functions and locators "addLocFrame" + "delLocFrame" + "updateLocFrame"
 				if locNum==3:
-					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.loc1[cb_index] + "|" + newLoc2  + "|" + newLoc3)
-					if self.addLocFrame.loc2[cb_index]=="":
+					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.locators[1][cb_index] + "|" + newLoc2  + "|" + newLoc3)
+					self.delLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.locators[1][cb_index] + "|" + newLoc2  + "|" + newLoc3)
+					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.locators[1][cb_index] + "|" + newLoc2  + "|" + newLoc3)
+
+					if self.addLocFrame.locators[2][cb_index]=="":
 						self.addLocFrame.success_msg.setText("Locators successfully added!")
+						self.addLocFrame.locators[2][cb_index] = newLoc2
+						self.delLocFrame.locators[2][cb_index] = newLoc2
+						self.updateLocFrame.locators[2][cb_index] = newLoc2
 					else:
 						self.addLocFrame.success_msg.setText("Locator successfully added!")
-					self.addLocFrame.loc2[cb_index] = newLoc2
-					self.addLocFrame.loc3[cb_index] = newLoc3
+
+					self.addLocFrame.locators[3][cb_index] = newLoc3
+					self.delLocFrame.locators[3][cb_index] = newLoc3
+					self.updateLocFrame.locators[3][cb_index] = newLoc3
 
 				elif locNum==2:	
-					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.loc1[cb_index] + "|" + newLoc2)
-					self.addLocFrame.loc2[cb_index] = newLoc2
-					self.addLocFrame.loc3[cb_index] = ""
+					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.locators[1][cb_index] + "|" + newLoc2)
+					self.delLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.locators[1][cb_index] + "|" + newLoc2)
+					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.locators[1][cb_index] + "|" + newLoc2)
+
+					self.addLocFrame.locators[2][cb_index] = newLoc2
+					self.delLocFrame.locators[2][cb_index] = newLoc2
+					self.updateLocFrame.locators[2][cb_index] = newLoc2
 					self.addLocFrame.success_msg.setText("Locator successfully added!")
 				else:
-					QtGui.QMessageBox.critical(self, 'Error', "Unknown error!" , QtGui.QMessageBox.Ok)
-
-				#Updating List of "updateLocFrame"
-				if locNum==3:
-					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.updateLocFrame.loc1[cb_index] + "|" + newLoc2 + "|" + newLoc3)
-					self.updateLocFrame.loc2[cb_index] = newLoc2
-					self.updateLocFrame.loc3[cb_index] = newLoc3
-
-				elif locNum==2:	
-					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.updateLocFrame.loc1[cb_index] + "|" + newLoc2)
-					self.updateLocFrame.loc2[cb_index] = newLoc2
-					self.updateLocFrame.loc3[cb_index] = ""
-
-				else:
-					QtGui.QMessageBox.critical(self, 'Error', "Unknown error!" , QtGui.QMessageBox.Ok)
+					QtGui.QMessageBox.critical(self, 'Error', "Unknown error (locNum, Loc Add)!" , QtGui.QMessageBox.Ok)
 
 		else:
 			self.addLocFrame.error_msg.setText(error)

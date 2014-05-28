@@ -1,6 +1,6 @@
 import MySQLdb
 
-def Loc_Update(SF, Locator):
+def addSF_Update(SF, Locator):
 	error=0
 	#Setting connexion to local DB to read locators
 	db = MySQLdb.connect("localhost","sfcuser","sfc123","SFC")
@@ -43,8 +43,50 @@ def Loc_Update(SF, Locator):
 
 	return error
 
+def delLoc_Update(SF, newLoc):
+	error=0
+	#Setting connexion to local DB to read locators
+	db = MySQLdb.connect("localhost","sfcuser","sfc123","SFC")
+	cursor = db.cursor()
+		
+	#Reading locators (IP addresses) of the existing SF Nodes
+	try:
+		sql = "SELECT Locator1 FROM Locators"
+		cursor.execute(sql)
+		results = cursor.fetchall()
+	except:
+		error = 1 
+		print "Error: unable to read data from the local server (locators of the existing SF Nodes)!"
+	db.close()
 
-def Update_Add(Index, rowMap):
+	sql = "UPDATE LocalLocators SET Locator = '%s' WHERE SF='%s'" % (newLoc, SF)
+
+	if error==0:
+		for result in results:
+			IP = result[0]
+
+			if newLoc==IP or error==1:
+				break
+			try:
+				remoteDB = MySQLdb.connect(IP,"sfcuser","sfc123","SFC")
+				remoteCursor = remoteDB.cursor()
+				try:
+					remoteCursor.execute(sql)
+					remoteDB.commit()
+					print "Updating local locators of the remote Node %s: Success!" % IP
+				except:
+					error=1
+					remoteDB.rollback()
+					print "Error: unable to update local locators of the remote Node %s!" % IP
+				remoteDB.close()
+			except:
+				error=1
+				print "Error: connecting to remote server %s failed! (Local locators update failed)" % IP
+
+	return error
+
+
+def addMap_Update(Index, rowMap):
 	error=0
 	SFMap = rowMap.lstrip('{')
 	SFMap = SFMap.rstrip('}')
@@ -121,7 +163,7 @@ def Update_Add(Index, rowMap):
 	return error
 
 
-def Update_Del(Index, rowMap):
+def delMap_Update(Index, rowMap):
 	error=0
 	SFMap = rowMap.lstrip('{')
 	SFMap = SFMap.rstrip('}')

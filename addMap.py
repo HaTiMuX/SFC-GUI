@@ -1,6 +1,6 @@
 import re
 from PyQt4 import QtGui
-from Functions import Update_Add
+from Functions import addMap_Update
 
 def addMap(self, db, cursor, DSCP, count):
 	if(count!=0):
@@ -31,7 +31,7 @@ def addMap(self, db, cursor, DSCP, count):
 					self.delMapFrame.combo.addItem(str(index) + " " + newSFMap)
 
 					#Updating SFC Routing Tables of the Nodes involved in the new SF Map
-					error = Update_Add(index, newSFMap)
+					error = addMap_Update(index, newSFMap)
 					if error==0:
 						print "Updating SFCRouting Tables: Success!"
 					else:

@@ -306,10 +306,6 @@ class addLocator_Frame(QtGui.QFrame):
 	def __init__(self, parent):
         	super(addLocator_Frame, self).__init__(parent)
 
-		self.loc1 = []
-		self.loc2 = []
-		self.loc3 = []
-
 		#Grid
        		grid = QtGui.QGridLayout()
 
@@ -335,26 +331,32 @@ class addLocator_Frame(QtGui.QFrame):
 		hbox.addWidget(self.addLoc)
 
 		#Combo Box
+		self.locators = [[],[],[],[]]
 		self.combo = QtGui.QComboBox(self)
 		sql = "SELECT SF, Locator1, Locator2, Locator3, LocNum FROM Locators"
 		try:	
 			cursor.execute(sql)
    			results = cursor.fetchall()
 		except:
-   			print "Error: unable to fecth data"
+   			print "Error: unable to fecth data (Loc Add)"
 
 		for result in results:
-			self.loc1.append(result[1])
-			self.loc2.append(result[2])
-			self.loc3.append(result[3])
-			if result[4]==3:	
-				self.combo.addItem(str(result[0]) + " => " + str(result[1]) + "|" + str(result[2]) + "|" + str(result[3]))
-			elif result[4]==2:	
-				self.combo.addItem(str(result[0]) + " => " + str(result[1]) + "|" + str(result[2]))
-			elif result[4]==1:
-				self.combo.addItem(str(result[0]) + " => " + str(result[1]))
+			SF = result[0]
+			locNum = result[4] 
+
+			self.locators[0].append(SF)
+			self.locators[1].append(result[1])
+			self.locators[2].append(result[2])		
+			self.locators[3].append(result[3])
+
+			if locNum==1:	
+				self.combo.addItem(SF + " => " + result[1])
+			elif locNum==2:
+				self.combo.addItem(SF + " => " + result[1] + "|" + result[2])
+			elif locNum==3:
+				self.combo.addItem(SF + " => " + result[1] + "|" + result[2] + "|" + result[3])	
 			else:
-				print "Error displaying SF Functions' list"
+				print "Error displaying SF Functions' list (Loc Add)"
 
 
 		#Main Box
@@ -376,11 +378,6 @@ class addLocator_Frame(QtGui.QFrame):
 class updateLocator_Frame(QtGui.QFrame):
 	def __init__(self, parent):
         	super(updateLocator_Frame, self).__init__(parent)
-
-		self.SFList = []
-		self.loc1 = []
-		self.loc2 = []
-		self.loc3 = []
 
 		#Grid
        		grid = QtGui.QGridLayout()
@@ -412,25 +409,33 @@ class updateLocator_Frame(QtGui.QFrame):
 		hbox.addWidget(self.updateLoc)
 
 		#Combo Box
+		self.locators = [[],[],[],[]]
 		self.combo = QtGui.QComboBox(self)
 		sql = "SELECT SF, Locator1, Locator2, Locator3, LocNum FROM Locators"
 		try:	
 			cursor.execute(sql)
    			results = cursor.fetchall()
 		except:
-   			print "Error: unable to fecth data"
+   			print "Error: unable to fecth data (Loc Update)"
 
 		for result in results:
-			self.SFList.append(str(result[0]))
-			self.loc1.append(result[1])
-			self.loc2.append(result[2])
-			self.loc3.append(result[3])
-			if result[4]==3:
-				self.combo.addItem(str(result[0]) + " => " + str(result[1]) + "|" + str(result[2]) + "|" + str(result[3]))
-			elif result[4]==2:	
-				self.combo.addItem(str(result[0]) + " => " + str(result[1]) + "|" + str(result[2]))
+			SF = result[0]
+			locNum = result[4] 
+
+			self.locators[0].append(SF)
+			self.locators[1].append(result[1])
+			self.locators[2].append(result[2])		
+			self.locators[3].append(result[3])
+
+			if locNum==1:	
+				self.combo.addItem(SF + " => " + result[1])
+			elif locNum==2:
+				self.combo.addItem(SF + " => " + result[1] + "|" + result[2])
+			elif locNum==3:
+				self.combo.addItem(SF + " => " + result[1] + "|" + result[2] + "|" + result[3])	
 			else:
-				self.combo.addItem(str(result[0]) + " => " + str(result[1]))
+				print "Error displaying SF Functions' list (Loc Update)"
+
 
 
 		#Main Box
@@ -453,31 +458,67 @@ class delLocator_Frame(QtGui.QFrame):
 	def __init__(self, parent):
         	super(delLocator_Frame, self).__init__(parent)
 
+		#Labels
 		self.error_msg = QtGui.QLabel("")
 		self.error_msg.setStyleSheet('color: red')
 		self.success_msg = QtGui.QLabel("")
 		self.success_msg.setStyleSheet('color: green')
-		typeLoc = QtGui.QLabel("Type the IP address of the locator to remove:")
+		chooseLoc = QtGui.QLabel("List of SF Functions and locators:")
 
-		#HBox
+		#HBox1
 	    	hbox1 = QtGui.QHBoxLayout()
-		loc_l= QtGui.QLabel("SF Locator")
-       		self.loc = QtGui.QLineEdit()
-		self.loc.setMaxLength(15)
-		hbox1.addWidget(loc_l)
-		hbox1.addWidget(self.loc)
+		pos_l = QtGui.QLabel("Locator Position:")
+		self.posCombo = QtGui.QComboBox(self)
+		self.posCombo.addItem("1")
+		self.posCombo.addItem("2")
+		self.posCombo.addItem("3")
+		hbox1.addWidget(pos_l)
+		hbox1.addWidget(self.posCombo)
+		hbox1.addStretch()
 
-		#HBox
+
+
+		#HBox2
 	    	hbox2 = QtGui.QHBoxLayout()
        		self.back = QtGui.QPushButton("Back")
        		self.delLoc = QtGui.QPushButton("Delete")
 		hbox2.addWidget(self.back)
 		hbox2.addWidget(self.delLoc)
 
+		#Combo Box
+		self.locators = [[],[],[],[]]
+		self.combo = QtGui.QComboBox(self)
+		sql = "SELECT SF, Locator1, Locator2, Locator3, LocNum FROM Locators"
+		try:	
+			cursor.execute(sql)
+   			results = cursor.fetchall()
+		except:
+   			print "Error: unable to fecth data (Loc Deletion)"
 
+
+		for result in results:
+			SF = result[0]
+			locNum = result[4] 
+
+			self.locators[0].append(SF)
+			self.locators[1].append(result[1])
+			self.locators[2].append(result[2])		
+			self.locators[3].append(result[3])
+
+			if locNum==1:	
+				self.combo.addItem(SF + " => " + result[1])
+			elif locNum==2:
+				self.combo.addItem(SF + " => " + result[1] + "|" + result[2])
+			elif locNum==3:
+				self.combo.addItem(SF + " => " + result[1] + "|" + result[2] + "|" + result[3])	
+			else:
+				print "Error displaying SF Functions' list (Loc Deletion)"
+
+			
 		#Main Box
 	    	self.vbox = QtGui.QVBoxLayout()
-		self.vbox.addWidget(typeLoc)
+		self.vbox.addWidget(chooseLoc)
+		self.vbox.addWidget(self.combo)
 		self.vbox.addLayout(hbox1)
 		self.vbox.addWidget(self.error_msg)
 		self.vbox.addWidget(self.success_msg)
@@ -684,6 +725,8 @@ class MainWindow(QtGui.QMainWindow):
 		self.updateLocFrame.combo.currentIndexChanged.connect(self.updateLocUpdate_comboEventHandler)
 		#Delete Locator Frame
 		self.delLocFrame.back.clicked.connect(self.backToSFUpdate_buttonClicked)
+		self.delLocFrame.delLoc.clicked.connect(self.delLoc_buttonClicked)
+		self.delLocFrame.combo.currentIndexChanged.connect(self.delLocUpdate_comboEventHandler)
 
 		#Add Map Frame
 		self.addMapFrame.resetMap.clicked.connect(self.resetMap_buttonClicked)
@@ -761,7 +804,7 @@ class MainWindow(QtGui.QMainWindow):
 	def delLocator_buttonClicked(self):
 		self.central_widget.setCurrentWidget(self.delLocFrame)
 		self.statusBar().showMessage("Deleting locator from an existing SF Function",0)
-		self.addLocUpdate_comboEventHandler()
+		self.delLocUpdate_comboEventHandler()
 			
 
 	#******************************#
@@ -789,6 +832,10 @@ class MainWindow(QtGui.QMainWindow):
 
 	def updateLocUpdate_comboEventHandler(self):
 		updateLocUpdate(self, db, cursor)
+
+	def delLocUpdate_comboEventHandler(self):
+		delLocUpdate(self, db, cursor)
+
 
 	def addLoc_buttonClicked(self): 
 		addLoc(self, db, cursor) 

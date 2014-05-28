@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from Functions import Update_Del
+from Functions import delMap_Update
 
 #Deleting an existing SF Function
 def delFunc(self, db, cursor, DSCP): 
@@ -74,7 +74,7 @@ def delFunc(self, db, cursor, DSCP):
 								print "  Updating SFMaps database: Failed!"
 
 							#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
-							error = Update_Del(index, rowMap)
+							error = delMap_Update(index, rowMap)
 							if error==0:	
 								print "  Updating SFC Routing Tables of the current SF Map: Success!"
 							else:

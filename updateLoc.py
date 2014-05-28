@@ -1,5 +1,5 @@
 import re
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
 def updateLocUpdate(self, db, cursor):
 	#Reading current SF functions
@@ -155,35 +155,50 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 	  				db.rollback()
 					print "Error Updating SF Locators"
 
-				#Updating List of SF Functions and locators "updateLocFrame" + "addLocFrame"
+				#Updating List of SF Functions and locators "updateLocFrame" + "addLocFrame" + "delLocFrame"
 				if locNum==3:
 					if emptyCond1 is False:	
-						self.updateLocFrame.loc1[cb_index] = newLoc1
-						self.addLocFrame.loc1[cb_index] = newLoc1
+						self.updateLocFrame.locators[1][cb_index] = newLoc1
+						self.addLocFrame.locators[1][cb_index] = newLoc1
+						self.delLocFrame.locators[1][cb_index] = newLoc1
 					if emptyCond2 is False:	
-						self.updateLocFrame.loc2[cb_index] = newLoc2
-						self.addLocFrame.loc2[cb_index] = newLoc2
+						self.updateLocFrame.locators[2][cb_index] = newLoc2
+						self.addLocFrame.locators[2][cb_index] = newLoc2
+						self.delLocFrame.locators[2][cb_index] = newLoc2
 					if emptyCond3 is False:
-						self.updateLocFrame.loc3[cb_index] = newLoc3	
-						self.addLocFrame.loc3[cb_index] = newLoc3
+						self.updateLocFrame.locators[3][cb_index] = newLoc3	
+						self.addLocFrame.locators[3][cb_index] = newLoc3
+						self.delLocFrame.locators[3][cb_index] = newLoc3
 		
-					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.updateLocFrame.loc1[cb_index] + "|" + self.updateLocFrame.loc2[cb_index] + "|" + self.updateLocFrame.loc3[cb_index])
-					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.loc1[cb_index] + "|" + self.addLocFrame.loc2[cb_index] + "|" + self.addLocFrame.loc3[cb_index])
+					loc1 = self.addLocFrame.locators[1][cb_index]
+					loc2 = self.addLocFrame.locators[2][cb_index]
+					loc3 = self.addLocFrame.locators[3][cb_index]
+					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + loc1 + "|" + loc2 + "|" + loc3)
+					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + loc1 + "|" + loc2 + "|" + loc3)
+					self.delLocFrame.combo.setItemText(cb_index, updatedSF + " => " + loc1 + "|" + loc2 + "|" + loc3)
 				elif locNum==2:	
 					if emptyCond1 is False:	
-						self.updateLocFrame.loc1[cb_index] = newLoc1
-						self.addLocFrame.loc1[cb_index] = newLoc1
+						self.updateLocFrame.locators[1][cb_index] = newLoc1
+						self.addLocFrame.locators[1][cb_index] = newLoc1
+						self.delLocFrame.locators[1][cb_index] = newLoc1
 					if emptyCond2 is False:	
-						self.updateLocFrame.loc2[cb_index] = newLoc2
-						self.addLocFrame.loc2[cb_index] = newLoc2
+						self.updateLocFrame.locators[2][cb_index] = newLoc2
+						self.addLocFrame.locators[2][cb_index] = newLoc2
+						self.delLocFrame.locators[2][cb_index] = newLoc2
 
-					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.updateLocFrame.loc1[cb_index] + "|" + self.updateLocFrame.loc2[cb_index])
-					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.loc1[cb_index] + "|" + self.addLocFrame.loc2[cb_index])
+					loc1 = self.addLocFrame.locators[1][cb_index]
+					loc2 = self.addLocFrame.locators[2][cb_index]
+					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + loc1 + "|" + loc2)
+					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + loc1 + "|" + loc2)
+					self.delLocFrame.combo.setItemText(cb_index, updatedSF + " => " + loc1 + "|" + loc2)
+				elif locNum==1:
+					self.updateLocFrame.locators[1][cb_index] = newLoc1
+					self.addLocFrame.locators[1][cb_index] = newLoc1
+					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + newLoc1)
+					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + newLoc1)
+					self.delLocFrame.combo.setItemText(cb_index, updatedSF + " => " + newLoc1)
 				else:
-					self.updateLocFrame.loc1[cb_index] = newLoc1
-					self.addLocFrame.loc1[cb_index] = newLoc1
-					self.updateLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.updateLocFrame.loc1[cb_index])
-					self.addLocFrame.combo.setItemText(cb_index, updatedSF + " => " + self.addLocFrame.loc1[cb_index])
+					print "Error updating Lists (Loc Update)"
 
 				self.updateLocFrame.success_msg.setText("Locators successfully updated!")
 		else:
