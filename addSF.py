@@ -1,5 +1,5 @@
 import re
-from Functions import addSF_Update
+from Functions import LocalLocators_Update
 from PyQt4 import QtGui
 
 
@@ -67,8 +67,8 @@ def addFunc(self, db, cursor):
 						error = 1
 						print "Adding New SF Function to local repository: Failed!"
 
-					#Updating LocalLocators of the SF Nodes
-					error = addSF_Update(SF, locator1)
+					#Updating LocalLocators Databases of the SF Nodes + the Ingress Node
+					error = LocalLocators_Update(SF, locator1, 1)
 					if error==0:
 						print "Updating LocalLocators: Success!"
 					else:
@@ -78,28 +78,36 @@ def addFunc(self, db, cursor):
 						#Updating List of "delFuncFrame"
 						self.delFuncFrame.combo.addItem(SF)	
 
-						#Updating List of "addLocFrame"
-						self.addLocFrame.loc1.append(locator1)
-						self.addLocFrame.loc2.append(locator2)
-						self.addLocFrame.loc3.append(locator3)
+						#Updating List of "addLocFrame" + "delLocFrame" + "updateLocFrame"
+						self.addLocFrame.locators[0].append(SF)
+						self.delLocFrame.locators[0].append(SF)
+						self.updateLocFrame.locators[0].append(SF)
+
+						self.addLocFrame.locators[1].append(locator1)
+						self.delLocFrame.locators[1].append(locator1)
+						self.updateLocFrame.locators[1].append(locator1)
+
+						self.addLocFrame.locators[2].append(locator2)
+						self.delLocFrame.locators[2].append(locator2)
+						self.updateLocFrame.locators[2].append(locator2)
+
+						self.addLocFrame.locators[3].append(locator3)
+						self.delLocFrame.locators[3].append(locator3)
+						self.updateLocFrame.locators[3].append(locator3)
+
 						if locNum==3:
 							self.addLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2 + "|" + locator3)
+							self.delLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2 + "|" + locator3)
+							self.updateLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2 + "|" + locator3)
 						if locNum==2:	
 							self.addLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2)
+							self.delLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2)
+							self.updateLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2)
 						elif locNum==1:
 							self.addLocFrame.combo.addItem(SF + " => " + locator1)
-		
-						#Updating List of "updateLocFrame"
-						self.updateLocFrame.SFList.append(SF)
-						self.updateLocFrame.loc1.append(locator1)
-						self.updateLocFrame.loc2.append(locator2)
-						self.updateLocFrame.loc3.append(locator3)
-						if locNum==3:
-							self.updateLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2 + "|" + locator3)
-						elif locNum==2:	
-							self.updateLocFrame.combo.addItem(SF + " => " + locator1 + "|" + locator2)
-						else:
+							self.delLocFrame.combo.addItem(SF + " => " + locator1)
 							self.updateLocFrame.combo.addItem(SF + " => " + locator1)
+		
 
 						#Updating List of available SF in the "Add Map Frame"
 						self.addMapFrame.checkBoxList[0].append(QtGui.QCheckBox(SF)) 

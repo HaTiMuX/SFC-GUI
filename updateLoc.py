@@ -1,5 +1,6 @@
 import re
 from PyQt4 import QtGui
+from Functions import LocalLocators_Update
 
 def updateLocUpdate(self, db, cursor):
 	#Reading current SF functions
@@ -43,7 +44,8 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 		cb_index = self.updateLocFrame.combo.currentIndex()
 		IPExp = "^((25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|1?[0-9][0-9]?)$"
 		emptyExp = "^( ?){15}$"
-		error = None
+		Error = None
+		error = 0
 
 		#reading SF Function to update
 		curtext = self.updateLocFrame.combo.currentText()
@@ -71,7 +73,7 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 			if (IPCond1 is True) and (emptyCond1 is False):
 				sql = "UPDATE Locators SET Locator1 = '%s' WHERE SF='%s'" % (newLoc1, updatedSF)
 			else:
-				error = "Type valid IP address for the first locator"
+				Error = "Type valid IP address for the first locator"
 
 		elif locNum==2:
 			newLoc1 = self.updateLocFrame.newLoc1_le.text()
@@ -86,11 +88,11 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 			print "Both the first and the second locator can be updated"
 			#lock other textfields
 			if (IPCond1 is False) and (emptyCond1 is False):
-				error = "Type valid IP address for the first locator"
+				Error = "Type valid IP address for the first locator"
 			elif (IPCond2 is False) and (emptyCond2 is False):
-				error =  "Type valid IP address for the second locator"
+				Error =  "Type valid IP address for the second locator"
 			elif (emptyCond1 is True) and (emptyCond2 is True):
-				error = "Type at least one locator to update"
+				Error = "Type at least one locator to update"
 			else:
 				if emptyCond1 is True:		
 					sql = "UPDATE Locators SET Locator2 = '%s' WHERE SF='%s'" % (newLoc2, updatedSF)
@@ -114,13 +116,13 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 
 			print "All locators can be updated"
 			if (IPCond1 is False) and (emptyCond1 is False):
-				error = "Type valid IP address for the first locator"
+				Error = "Type valid IP address for the first locator"
 			elif (IPCond2 is False) and (emptyCond2 is False):
-				error = "Type valid IP address for the second locator"
+				Error = "Type valid IP address for the second locator"
 			elif (IPCond3 is False) and (emptyCond3 is False):
-				error = "Type valid IP address for the third locator"
+				Error = "Type valid IP address for the third locator"
 			elif (emptyCond1 is True) and (emptyCond2 is True) and (emptyCond3 is True):
-				error = "Type at least one locator to update"
+				Error = "Type at least one locator to update"
 			else:
 				if emptyCond1 is True:		
 					if emptyCond2 is True:		
@@ -142,7 +144,7 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 					sql = "UPDATE Locators SET Locator1 = '%s', Locator2 = '%s', Locator3 = '%s' WHERE SF='%s'" % (newLoc1, newLoc2, newLoc3, updatedSF)
 
 
-		if error is None:
+		if Error is None:
 			self.updateLocFrame.error_msg.setText("")
 			msg = "Are you sure to update the selected Entry?"
 			reply = QtGui.QMessageBox.question(self, 'Confirmation', msg , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
@@ -154,6 +156,10 @@ def updateLoc(self, db, cursor): #updating locators of an existing SF Function
 				except:
 	  				db.rollback()
 					print "Error Updating SF Locators"
+
+
+				#Updating Local Locators
+				error = LocalLocators_Update(updatedSF, newLoc1, 2)
 
 				#Updating List of SF Functions and locators "updateLocFrame" + "addLocFrame" + "delLocFrame"
 				if locNum==3:

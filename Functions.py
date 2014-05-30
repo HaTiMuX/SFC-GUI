@@ -1,90 +1,148 @@
 import MySQLdb
 
-def addSF_Update(SF, Locator):
+def LocalLocators_Update(SF, Locator, operation):
 	error=0
 	#Setting connexion to local DB to read locators
 	db = MySQLdb.connect("localhost","sfcuser","sfc123","SFC")
 	cursor = db.cursor()
-		
+
 	#Reading locators of the existing SF Nodes
 	try:
-		sql = "SELECT Locator1 FROM Locators"
+		sql = "SELECT SF, Locator1 FROM Locators"
 		cursor.execute(sql)
 		results = cursor.fetchall()
 	except:
+
 		error = 1 
 		print "Error: unable to read data from the local server (locators of the existing SF Nodes)!"
 	db.close()
 
-	sql = "INSERT INTO LocalLocators (SF, Locator) VALUES ('%s','%s')" % (SF, Locator)
+	#Updating LocalLocators of the new Added Node
+	if operation==1:
+		print "Adding information to the LocalLocators database of the new added Node:"
+		try:
+			remoteDB = MySQLdb.connect(str(Locator),"sfcuser","sfc123","SFC")
+			remoteCursor = remoteDB.cursor()
+			for result in results:
+				remoteSF = result[0]
+				Loc = result[1]
+				sql1 = "INSERT INTO LocalLocators (SF, Locator) VALUES ('%s','%s')" % (remoteSF, Loc)
+				try:
+					remoteCursor.execute(sql1)
+				except:
+					remoteDB.rollback()
+					error=1
+					break
+		except:
+			error=1
+			print "Error: connecting to remote server %s failed! (Local locators update failed)" % Locator
 
+		if error==0:
+			remoteDB.commit()
+			print "Adding data to remote Node %s: Success!" % Locator
+		else:
+			print "Error: unable to add data to remote Node %s!" % Locator
+
+		remoteDB.close()
+
+	#Updating LocalLocators of the new Added Node
+	if operation==3:
+		print "Deleting information in LocalLocators database of the removed Node:"
+		try:
+			remoteDB = MySQLdb.connect(str(Locator),"sfcuser","sfc123","SFC")
+			remoteCursor = remoteDB.cursor()
+			sql1 = "DELETE FROM LocalLocators"
+			try:
+				remoteCursor.execute(sql1)
+			except:
+				remoteDB.rollback()
+				error=1
+				break
+		except:
+			error=1
+			print "Error: connecting to remote server %s failed! (Local locators update failed)" % Locator
+
+		if error==0:
+			remoteDB.commit()
+			print "Deleting data from the remote Node %s: Success!" % Locator
+		else:
+			print "Error: unable to delete data from the remote Node %s!" % Locator
+
+		remoteDB.close()
+
+
+	#Preparing Query
+	if operation==1:
+		sql = "INSERT INTO LocalLocators (SF, Locator) VALUES ('%s', '%s')" % (SF, Locator)
+	elif operation==2:
+		sql = "UPDATE LocalLocators SET Locator = '%s' WHERE SF='%s'" % (Locator, SF)
+	else:
+		sql = "DELETE FROM LocalLocators WHERE SF='%s'" % (SF)
+
+	#Updating LocalLocators Database of the Ingress Node 
+	try:
+		classifierDB = MySQLdb.connect("10.1.0.99","sfcuser","sfc123","SFC")
+		classifierCursor = classifierDB.cursor()
+
+		classifierCursor.execute(sql)
+		classifierDB.commit()
+
+		if operation==1:
+			print "Adding locator to the Ingress Node: Success!"
+		elif operation==2:
+			print "Updating locator in the Ingress Node: Success!"
+		else:
+			print "Deleteing locator from the Ingress Node: Success!"
+
+	except:
+		classifierDB.rollback()
+		error = 1
+		if operation==1:
+			print "Error: Adding locator to the Ingress Node: Failed!"
+		elif operation==2:
+			print "Error: Updating locator in the Ingress Node: Failed!"
+		else:
+			print "Error: Deleteing locator from the Ingress Node: Failed!"
+	classifierDB.close()
+
+
+	#Updating LocalLocators Database of the SF Nodes
 	if error==0:
 		for result in results:
-			IP = result[0]
-
-			if Locator==IP or error==1:
-				break
+			IP = result[1]
 			try:
 				remoteDB = MySQLdb.connect(IP,"sfcuser","sfc123","SFC")
 				remoteCursor = remoteDB.cursor()
 				try:
 					remoteCursor.execute(sql)
 					remoteDB.commit()
-					print "Adding data to remote Node %s: Success!" % IP
-					remoteDB.close()
+					if operation==1:
+						print "Adding locator to the remote Node %s: Success!" % IP
+					elif operation==2:
+						print "Updating locator in the remote Node %s: Success!" % IP
+					else:
+						print "Deleteing locator from the remote Node %s: Success!" % IP
 				except:
 					error=1
 					remoteDB.rollback()
-					print "Error: unable to add data to remote Node %s!" % IP
-					remoteDB.close()
+					if operation==1:
+						print "Error: unable to add data to the remote Node %s!" % IP
+					elif operation==2:
+						print "Error: unable to update data in the remote Node %s!" % IP
+					else:
+						print "Error: unable to delete data from the remote Node %s!" % IP
+				remoteDB.close()
 			except:
 				error=1
 				print "Error: connecting to remote server %s failed! (Local locators add failed)" % IP
 
-	return error
+			if IP==Locator:
+				continue
 
-def delLoc_Update(SF, newLoc):
-	error=0
-	#Setting connexion to local DB to read locators
-	db = MySQLdb.connect("localhost","sfcuser","sfc123","SFC")
-	cursor = db.cursor()
-		
-	#Reading locators (IP addresses) of the existing SF Nodes
-	try:
-		sql = "SELECT Locator1 FROM Locators"
-		cursor.execute(sql)
-		results = cursor.fetchall()
-	except:
-		error = 1 
-		print "Error: unable to read data from the local server (locators of the existing SF Nodes)!"
-	db.close()
-
-	sql = "UPDATE LocalLocators SET Locator = '%s' WHERE SF='%s'" % (newLoc, SF)
-
-	if error==0:
-		for result in results:
-			IP = result[0]
-
-			if newLoc==IP or error==1:
+			if error==1:
 				break
-			try:
-				remoteDB = MySQLdb.connect(IP,"sfcuser","sfc123","SFC")
-				remoteCursor = remoteDB.cursor()
-				try:
-					remoteCursor.execute(sql)
-					remoteDB.commit()
-					print "Updating local locators of the remote Node %s: Success!" % IP
-				except:
-					error=1
-					remoteDB.rollback()
-					print "Error: unable to update local locators of the remote Node %s!" % IP
-				remoteDB.close()
-			except:
-				error=1
-				print "Error: connecting to remote server %s failed! (Local locators update failed)" % IP
 
 	return error
-
 
 def addMap_Update(Index, rowMap):
 	error=0

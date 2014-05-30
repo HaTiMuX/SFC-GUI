@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from Functions import delLoc_Update
+from Functions import LocalLocators_Update
 
 def delLocUpdate(self, db, cursor):
 	#Reading current SF functions
@@ -35,15 +35,13 @@ def delLocUpdate(self, db, cursor):
 			self.delLocFrame.posCombo.removeItem(2) #3rd item
 			self.delLocFrame.posCombo.removeItem(1) #2nd item
 			self.delLocFrame.posCombo.removeItem(0) #1st item
-
-
-
 	except:
-		print "No entry remaining (update)"
+		print "No entry remaining (delete)"
 
 
 
 def delLoc(self, db, cursor):
+	if self.addLocFrame.combo.count() != 0:
 		error = 0
 		cb_index = self.delLocFrame.combo.currentIndex()
 		SF = self.delLocFrame.locators[0][cb_index]
@@ -73,7 +71,7 @@ def delLoc(self, db, cursor):
 					loc2 = ""
 					sql = "UPDATE Locators SET Locator1 = '%s', Locator2 = '%s', LocNum = 1 WHERE SF='%s'" % (loc1, loc2, SF)
 					#Updating local locators Databases
-					error = delLoc_Update(SF, loc1)
+					error = LocalLocators_Update(SF, loc1, 2)
 
 				elif pos==2:
 					loc2 = ""
@@ -98,7 +96,7 @@ def delLoc(self, db, cursor):
 					loc1 = result[2]
 					sql = "UPDATE Locators SET Locator1 = '%s', Locator2 = '%s', Locator3 = '%s', LocNum = 2 WHERE SF='%s'" % (loc1, loc2, loc3, SF)
 					#Updating local locators Databases
-					error = delLoc_Update(SF, loc1)
+					error = LocalLocators_Update(SF, loc1, 2)
 			else:
 				error=1
 
@@ -138,18 +136,14 @@ def delLoc(self, db, cursor):
 				try:
 					cursor.execute(sql)
 			   		db.commit()
+					self.delLocFrame.success_msg.setText("Locator deleted Successfully")
+					self.delLocFrame.error_msg.setText("")
 				except:
 	  				db.rollback()
-					error=1
-					print "Error Updating SF Locators (Loc Deletion)"
-			
+					self.delLocFrame.error_msg.setText("Locator deletion failed!")
+					self.delLocFrame.success_msg.setText("")
 
-			if error==0:
-				self.delLocFrame.success_msg.setText("Locator deleted Successfully")
-				self.delLocFrame.error_msg.setText("")
-			else:
-				self.delLocFrame.error_msg.setText("Locator deletion failed!")
-				self.delLocFrame.success_msg.setText("")
-
+	else:
+		QtGui.QMessageBox.critical(self, 'Error', "No Entry remaining!" , QtGui.QMessageBox.Ok)
 
 

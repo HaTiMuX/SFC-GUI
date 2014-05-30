@@ -1,5 +1,5 @@
 from PyQt4 import QtGui
-from Functions import delMap_Update
+from Functions import delMap_Update, LocalLocators_Update
 
 #Deleting an existing SF Function
 def delFunc(self, db, cursor, DSCP): 
@@ -8,13 +8,14 @@ def delFunc(self, db, cursor, DSCP):
 		SF = curtext.split(' ')
 		removedSF = SF[0]
 		indexesList = []
-		print "***** SF Function to remove: " + removedSF + " *****"
 
 		msg = "Are you sure to delete the selected Entry?"
 		reply = QtGui.QMessageBox.question(self, 'Confirmation', msg , QtGui.QMessageBox.Yes | QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
 		if reply == QtGui.QMessageBox.Yes:
 			error = 0
+			print "***** SF Function to remove: " + removedSF + " *****"
+
 			#Updating SF Locators Database (Deleting the selected SF Function)
 			try:
 				sql = "DELETE FROM Locators WHERE SF='%s'" % removedSF
@@ -24,7 +25,10 @@ def delFunc(self, db, cursor, DSCP):
 				error = 1
 				print "* Deleting SF from Locators database: Failed!"
 
-			#Removing associeted SFMaps
+			#Updating SF LocalLocators Database 
+			error = LocalLocators_Update(removedSF, None, 3)
+
+			#Removing associeted SFMaps (SFMaps Database + List of delMapFrame)
 			try:	
 				sql = "SELECT SF_MAP_INDEX, SFMap FROM SFMaps"
 				cursor.execute(sql)
@@ -59,11 +63,6 @@ def delFunc(self, db, cursor, DSCP):
 								error = 1
 								print "  Updating DSCP values: Failed!"
 
-							#Updating List of availble SF Maps
-							cb_index = self.delMapFrame.SFMapIndexesList.index(index) #getting index of the current map to remove
-							self.delMapFrame.SFMapIndexesList.pop(cb_index)
-							self.delMapFrame.combo.removeItem(cb_index)
-
 							#Updating SFMaps database
 							try:	
 								sql = "DELETE FROM SFMaps WHERE SF_Map_Index=%d" % index
@@ -72,6 +71,11 @@ def delFunc(self, db, cursor, DSCP):
 							except:
 								error = 1
 								print "  Updating SFMaps database: Failed!"
+
+							#Updating List of availble SF Maps
+							cb_index = self.delMapFrame.SFMapIndexesList.index(index) #getting index of the current map to remove
+							self.delMapFrame.SFMapIndexesList.pop(cb_index)
+							self.delMapFrame.combo.removeItem(cb_index)
 
 							#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
 							error = delMap_Update(index, rowMap)
@@ -96,22 +100,39 @@ def delFunc(self, db, cursor, DSCP):
 
 
 			if error==0:
+				#getting index of the current SF to remove
+				index = self.delFuncFrame.combo.currentIndex() 
+
+				#Updating the list of availble SF functions to delete "delFuncFrame"
+				self.delFuncFrame.combo.removeItem(index)
+
+				#Updating Lists of "addLocFrame" + "delLocFrame" + "updateLocFrame"
+				self.addLocFrame.locators[0].pop(index)
+				self.delLocFrame.locators[0].pop(index)
+				self.updateLocFrame.locators[0].pop(index)
+
+				self.addLocFrame.locators[1].pop(index)
+				self.delLocFrame.locators[1].pop(index)
+				self.updateLocFrame.locators[1].pop(index)
+
+				self.addLocFrame.locators[2].pop(index)
+				self.delLocFrame.locators[2].pop(index)
+				self.updateLocFrame.locators[2].pop(index)
+
+				self.addLocFrame.locators[3].pop(index)
+				self.delLocFrame.locators[3].pop(index)
+				self.updateLocFrame.locators[3].pop(index)
+
+				self.addLocFrame.combo.removeItem(index)
+				self.delLocFrame.combo.removeItem(index)
+				self.updateLocFrame.combo.removeItem(index)
+
 				#Updating the list of availble SF Functions (addMapFrame)
 				cb_index = self.addMapFrame.checkBoxList[1].index(removedSF) 
 				self.addMapFrame.checkBoxList[0].pop(cb_index)
 				self.addMapFrame.checkBoxList[1].pop(cb_index)
 				self.addMapFrame.grid.itemAt(cb_index).widget().deleteLater()
 				self.addMapFrame.SFCheckListDisplay()
-
-				#Updating the list of availble SF functions to delete "delFuncFrame"
-				index = self.delFuncFrame.combo.currentIndex()	
-				self.delFuncFrame.combo.removeItem(index)
-
-				#Updating the list of "updateLocFrame"
-				self.updateLocFrame.combo.removeItem(index)
-
-				#Updating the list of "addLocFrame"
-				self.addLocFrame.combo.removeItem(index)
 
 				db.commit()
 				print "Deleting SF Function " + removedSF + ": Success!"

@@ -57,7 +57,6 @@ def addMap(self, db, cursor, DSCP, count):
 			try:	
 				cursor.execute(sql)
 	   			result = cursor.fetchone()
-
 				if result is None:
 					DSCP.remove(index) #Updating DSCP available values
 					#Adding new SF Map on confirmation
@@ -76,7 +75,7 @@ def addMap(self, db, cursor, DSCP, count):
 						self.delMapFrame.combo.addItem(str(index) + " " + newSFMap)
 
 						#Updating SFC Routing Tables of the Nodes involved in the new SF Map
-						error = Update_Add(index, newSFMap)
+						error = addMap_Update(index, newSFMap)
 						if error==0:
 							print "Updating SFCRouting Tables: Success!"
 						else:
