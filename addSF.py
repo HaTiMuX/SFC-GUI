@@ -62,7 +62,6 @@ def addFunc(self, db, cursor):
 							locNum -= 1
 						sql = "INSERT INTO Locators (SF, Locator1, Locator2, Locator3, Description, LocNum) VALUES ('%s', '%s', '%s', '%s', '%s', %d)" % (SF, locator1, locator2, locator3, description, locNum)
 						cursor.execute(sql)
-						print "Adding New SF Function to local repository: Success!"
 					except:
 						error = 1
 						print "Adding New SF Function to local repository: Failed!"

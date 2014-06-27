@@ -16,6 +16,17 @@ def delFunc(self, db, cursor, DSCP):
 			error = 0
 			print "***** SF Function to remove: " + removedSF + " *****"
 
+			#Reading Locator of the removed SF
+			try:	
+				sql = "SELECT Locator1 FROM Locators WHERE SF='%s'" % removedSF
+				cursor.execute(sql)
+				result = cursor.fetchone()
+			except:
+				error = 1
+
+			#Updating SF LocalLocators Database 
+			error = LocalLocators_Update(removedSF, result[0], 3)
+
 			#Updating SF Locators Database (Deleting the selected SF Function)
 			try:
 				sql = "DELETE FROM Locators WHERE SF='%s'" % removedSF
@@ -25,8 +36,6 @@ def delFunc(self, db, cursor, DSCP):
 				error = 1
 				print "* Deleting SF from Locators database: Failed!"
 
-			#Updating SF LocalLocators Database 
-			error = LocalLocators_Update(removedSF, None, 3)
 
 			#Removing associeted SFMaps (SFMaps Database + List of delMapFrame)
 			try:	
@@ -38,7 +47,7 @@ def delFunc(self, db, cursor, DSCP):
 				error = 1
 				print "* Reading SFMaps: Failed!" 
 
-			if(error==0):
+			if error==0:
 				for result in results:
 					index = int(result[0])
 					rowMap = result[1]
@@ -58,19 +67,19 @@ def delFunc(self, db, cursor, DSCP):
 							#Updating DSCP available values
 							try:
 								DSCP.append(index) 
-								print "  Updating DSCP values: Success!"
+								print "\tUpdating DSCP values: Success!"
 							except:
 								error = 1
-								print "  Updating DSCP values: Failed!"
+								print "\tUpdating DSCP values: Failed!"
 
 							#Updating SFMaps database
 							try:	
 								sql = "DELETE FROM SFMaps WHERE SF_Map_Index=%d" % index
 								cursor.execute(sql)
-								print "  Updating SFMaps database: Success!"
+								print "\tUpdating SFMaps database: Success!"
 							except:
 								error = 1
-								print "  Updating SFMaps database: Failed!"
+								print "\tUpdating SFMaps database: Failed!"
 
 							#Updating List of availble SF Maps
 							cb_index = self.delMapFrame.SFMapIndexesList.index(index) #getting index of the current map to remove
@@ -80,15 +89,15 @@ def delFunc(self, db, cursor, DSCP):
 							#Updating SFC Routing Tables of the Nodes involved in the deleted SF Map
 							error = delMap_Update(index, rowMap)
 							if error==0:	
-								print "  Updating SFC Routing Tables of the current SF Map: Success!"
+								print "\tUpdating SFC Routing Tables of the current SF Map: Success!"
 							else:
 								error = 1
-								print "  Updating SFC Routing Tables of the current SF Map: Failed!"
+								print "\tUpdating SFC Routing Tables of the current SF Map: Failed!"
 
 							if error==0:
-								print "  Deleting associated SF Map: %d %s : Success!" % (index, rowMap)
+								print "\tDeleting associated SF Map: %d %s : Success!" % (index, rowMap)
 							else:
-								print "  Deleting associated SF Map: %d %s : Failed!" % (index, rowMap)
+								print "\tDeleting associated SF Map: %d %s : Failed!" % (index, rowMap)
 								#Restoring DSCP values in case of error
 								DSCP.remove(index)
 

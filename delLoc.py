@@ -17,7 +17,6 @@ def delLocUpdate(self, db, cursor):
 	try:
 		locNum = result[0]
 		count = self.delLocFrame.posCombo.count()
-		print count
 		if locNum==3:
 			if count==0:
 				self.delLocFrame.posCombo.addItem("1")

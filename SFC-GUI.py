@@ -5,6 +5,7 @@ import sys
 from math import sqrt
 import re
 from PyQt4 import QtGui, QtCore
+
 import MySQLdb
 
 from manRules import *
@@ -107,18 +108,51 @@ class addRule_Frame(QtGui.QFrame):
         	super(addRule_Frame, self).__init__(parent)
 
 	    	self.vbox = QtGui.QVBoxLayout(self)
+		self.error = QtGui.QLabel("")
+		self.error.setStyleSheet('color: red')
 
 		#Grid Layout
+        	groupBox1 = QtGui.QGroupBox("Classification criteria")
        		grid = QtGui.QGridLayout()
-		rules_IP_l = QtGui.QLabel("IP Source")
-       		self.rules_IP_le = QtGui.QLineEdit()
-		rules_port_l = QtGui.QLabel("Destination Port")
-       		self.rules_port_le = QtGui.QLineEdit()
 
-		grid.addWidget(rules_IP_l, 0, 0)
-		grid.addWidget(self.rules_IP_le, 0, 1)
-		grid.addWidget(rules_port_l, 1, 0)
-		grid.addWidget(self.rules_port_le, 1, 1)
+		rules_SIP_l = QtGui.QLabel("IP Source")
+       		self.rules_SIP_le = QtGui.QLineEdit()
+		self.rules_SIP_le.setMaxLength(15)
+		rules_DIP_l = QtGui.QLabel("IP Destination")
+       		self.rules_DIP_le = QtGui.QLineEdit()
+		self.rules_DIP_le.setMaxLength(15)
+		rules_proto_l = QtGui.QLabel("Protocol")
+		self.protoCombo = QtGui.QComboBox(self)
+		self.protoCombo.addItem("None")
+		self.protoCombo.addItem("ICMP")
+		self.protoCombo.addItem("TCP")
+		self.protoCombo.addItem("UDP")
+
+		rules_sport_l = QtGui.QLabel("Source Port")
+       		self.rules_sport_le = QtGui.QLineEdit()
+		self.rules_sport_le.setMaxLength(5)
+		rules_dport_l = QtGui.QLabel("Destination Port")
+       		self.rules_dport_le = QtGui.QLineEdit()
+		self.rules_dport_le.setMaxLength(5)
+		rules_prio_l = QtGui.QLabel("Rule Priority")
+       		self.rules_prio_le = QtGui.QLineEdit()
+		self.rules_prio_le.setMaxLength(2)
+
+		grid.addWidget(rules_SIP_l, 0, 0)
+		grid.addWidget(self.rules_SIP_le, 0, 1)
+		grid.addWidget(rules_DIP_l, 1, 0)
+		grid.addWidget(self.rules_DIP_le, 1, 1)
+		grid.addWidget(rules_proto_l, 2, 0)
+		grid.addWidget(self.protoCombo, 2, 1)
+		grid.addWidget(rules_sport_l, 3, 0)
+		grid.addWidget(self.rules_sport_le, 3, 1)
+		grid.addWidget(rules_dport_l, 4, 0)
+		grid.addWidget(self.rules_dport_le, 4, 1)
+		grid.addWidget(rules_prio_l, 5, 0)
+		grid.addWidget(self.rules_prio_le, 5, 1)
+
+		groupBox1.setLayout(grid)
+
 
 		#HBox
 	    	hbox = QtGui.QHBoxLayout()
@@ -127,9 +161,12 @@ class addRule_Frame(QtGui.QFrame):
 		hbox.addWidget(self.back)
 		hbox.addWidget(self.addRule)
 
-		#Combo Box
-		self.combo = QtGui.QComboBox(self)
-		sql = "SELECT SF_MAP_INDEX FROM SFMaps"			
+		#Mark Combo
+	    	comboLayout = QtGui.QHBoxLayout()
+        	groupBox2 = QtGui.QGroupBox("Matching SF Map")
+
+		self.markCombo = QtGui.QComboBox(self)
+		sql = "SELECT SF_MAP_INDEX, SFMap FROM SFMaps"			
 		try:	
 			cursor.execute(sql)
    			results = cursor.fetchall()
@@ -137,15 +174,15 @@ class addRule_Frame(QtGui.QFrame):
    			print "Error: unable to fecth data (SF_MAP_INDEX)"
 
 		for result in results:
-			self.combo.addItem(str(result[0]))
+			self.markCombo.addItem(str(result[0]) + " " + str(result[1]))
 
-		self.error = QtGui.QLabel("")
-		self.error.setStyleSheet('color: red')
+		comboLayout.addWidget(self.markCombo)
+		groupBox2.setLayout(comboLayout)
 
 
  		#Main Box
-		self.vbox.addLayout(grid)
-		self.vbox.addWidget(self.combo)
+		self.vbox.addWidget(groupBox1)
+		self.vbox.addWidget(groupBox2)
 		self.vbox.addWidget(self.error)
         	self.vbox.addStretch()
 		self.vbox.addLayout(hbox)
@@ -165,23 +202,34 @@ class delRule_Frame(QtGui.QFrame):
 
 		#Combo Box
 		self.combo = QtGui.QComboBox(self)
-		sql = "SELECT SF_MAP_INDEX, IP, port FROM Rules"			
+		sql = "SELECT SF_MAP_INDEX, SIP, DIP, Protocol, SPort, DPort FROM ClassRules ORDER BY ParNum DESC"			
 		try:	
 			cursor.execute(sql)
    			results = cursor.fetchall()
 		except:
    			print "Error: unable to fecth data (Reading Rules)"
 
+
 		for result in results:
-			if(str(result[1])!= None):
-				IP = "IP=" + str(result[1])
+			SIP = "S="
+			DIP = "D=" 
+			proto = "pr="
+			sport = "sp="
+			dport = "dp="
 
-			if(str(result[2])!= None):
-				port = "Port=" + str(result[2])
+			if(str(result[1])!="None"):
+				SIP =  SIP + str(result[1])
+			if(str(result[2])!="None"):
+				DIP = DIP + str(result[2])
+			if(str(result[3])!="None"):
+				proto = proto + str(result[3])
+			if(str(result[4])!="None"):
+				sport = sport + str(result[4])
+			if(str(result[5])!="None"):
+				dport = dport + str(result[5])
 
-			self.combo.addItem(str(result[0]) + ": " + IP + ", " + port)
-			IP = ""
-			port = ""
+			self.combo.addItem(str(result[0]) + ": " + SIP + " " + DIP + " " + proto + " " + sport + " " + dport)
+
 
 		#Main Box
 	    	self.vbox = QtGui.QVBoxLayout()
